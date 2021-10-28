@@ -7,9 +7,36 @@ from quicksort import quickSort
 from bubblesort import bubbleSort
 import psutil
 import tracemalloc
+import linecache
+
+def display_top(snapshot, key_type='lineno', limit=None):
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    for index, stat in enumerate(top_stats[:limit], 1):
+        frame = stat.traceback[0]
+        # replace "/path/to/module/file.py" with "module/file.py"
+        filename = os.sep.join(frame.filename.split(os.sep)[-2:])
+        print("#%s: %s:%s: %.1f KiB"
+              % (index, filename, frame.lineno, stat.size / 1024))
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        if line:
+            print('    %s' % line)
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        print("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+
+    return (total / 1024)
 
 
-n = 100000
+
+n = 2000
 
 fixer = int(1/4 * n)
 
@@ -36,26 +63,32 @@ for x in range(1,n+2,fixer):
     quicksortstartTime = time.time()
     tracemalloc.start()
 
-
     quickSort(data,0,x-1)
 
+    snapshot = tracemalloc.take_snapshot()
+    quicksortmemoryUsage.append(display_top(snapshot))
 
-    quicksortmemoryUsage.append(tracemalloc.get_traced_memory()[1])
+    #quicksortmemoryUsage.append(tracemalloc.get_traced_memory()[1])
     tracemalloc.stop()
 
     quicksorttimeValues.append(time.time() - quicksortstartTime)
 
-""""
+
 # BUBBLESORT RUNTHORUGH
-for x in range(1,n+1,fixer):
+for x in range(1,n+2,fixer):
     data = [*range(1,x+1)]
     random.shuffle(data)
     bubblesortstartTime = time.time()
+    tracemalloc.start()
 
     bubbleSort(data)
 
+    snapshot = tracemalloc.take_snapshot()
+    bubblesortmemoryUsage.append(display_top(snapshot))
+    tracemalloc.stop()
+
     bubblesorttimeValues.append(time.time() - bubblesortstartTime)
-"""
+
 
 # TIMSORT RUNTHORUGH
 for x in range(1,n+2,fixer):
@@ -67,7 +100,8 @@ for x in range(1,n+2,fixer):
 
     data.sort()
 
-    timsortmemoryUsage.append(tracemalloc.get_traced_memory()[1])
+    snapshot = tracemalloc.take_snapshot()
+    timsortmemoryUsage.append(display_top(snapshot))
     tracemalloc.stop()
 
     timsorttimeValues.append(time.time() - timsortstartTime)
@@ -85,13 +119,16 @@ figure, axis = plt.subplots(2)
 plt.plot(arrayLength, quicksorttimeValues, marker="o")
 #plt.plot(bubblesorttimeValues, Operations,marker="o")
 plt.plot(arrayLength, timsorttimeValues, marker="o")
+plt.plot(arrayLength, bubblesorttimeValues, marker="o")
 
 
 
 axis[0].plot(arrayLength, quicksortmemoryUsage, marker="o")
 axis[0].plot(arrayLength, timsortmemoryUsage, marker="o")
+axis[0].plot(arrayLength, bubblesortmemoryUsage, marker="o")
 
-axis[0].legend(["Quicksort","Timsort"])
+
+axis[0].legend(["Quicksort","Timsort","Bubblesort"])
 
 plt.setp(axis[0], xlabel='length of array')
 plt.setp(axis[0], ylabel='memory usage (b)')
@@ -101,7 +138,7 @@ plt.setp(axis[0], ylabel='memory usage (b)')
 
 
 
-plt.legend(["Quicksort","Timsort"])
+plt.legend(["Quicksort","Timsort","Bubblesort"])
 
 #plt.legend(["Quicksort", "Bubblesort","Timsort"])
 
@@ -126,6 +163,8 @@ plt.show()
 
 print(timsortmemoryUsage)
 print(quicksortmemoryUsage)
+print(bubblesortmemoryUsage)
+
 
 
 
