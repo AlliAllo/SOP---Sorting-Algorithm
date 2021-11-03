@@ -5,6 +5,8 @@ import tracemalloc
 import time
 from quicksort import quickSort
 from bubblesort import bubbleSort
+from mergesort import timSort
+
 import psutil
 import tracemalloc
 import linecache
@@ -20,23 +22,20 @@ def display_top(snapshot, key_type='lineno', limit=None):
         frame = stat.traceback[0]
         # replace "/path/to/module/file.py" with "module/file.py"
         filename = os.sep.join(frame.filename.split(os.sep)[-2:])
-        print("#%s: %s:%s: %.1f KiB"
-              % (index, filename, frame.lineno, stat.size / 1024))
+
         line = linecache.getline(frame.filename, frame.lineno).strip()
-        if line:
-            print('    %s' % line)
+
 
     other = top_stats[limit:]
     if other:
         size = sum(stat.size for stat in other)
-        print("%s other: %.1f KiB" % (len(other), size / 1024))
     total = sum(stat.size for stat in top_stats)
 
     return (total / 1024)
 
 
 
-n = 2000
+n = 5000
 
 fixer = int(1/4 * n)
 
@@ -45,31 +44,34 @@ arrayLength = [element * 1000 for element in arrayLength]
 
 quicksorttimeValues = []
 quicksortmemoryUsage = []
+quicksortcallbacks = []
 
 bubblesorttimeValues = []
 bubblesortmemoryUsage = []
+bubblesortcallbacks = []
 
 timsorttimeValues = []
 timsortmemoryUsage = []
-
-
+timsortcallbacks = []
 
 # QUICKSORT RUNTHORUGH
 for x in range(1,n+2,fixer):
     data = [*range(1,x+1)]
     random.shuffle(data)
 
-
+    quickSort.callbacks = 0
     quicksortstartTime = time.time()
     tracemalloc.start()
 
-    quickSort(data,0,x-1)
+    quickSort(data, 0, x - 1)
 
     snapshot = tracemalloc.take_snapshot()
     quicksortmemoryUsage.append(display_top(snapshot))
 
     #quicksortmemoryUsage.append(tracemalloc.get_traced_memory()[1])
     tracemalloc.stop()
+    quicksortcallbacks.append(quickSort.callbacks)
+    print(quicksortcallbacks)
 
     quicksorttimeValues.append(time.time() - quicksortstartTime)
 
@@ -78,8 +80,11 @@ for x in range(1,n+2,fixer):
 for x in range(1,n+2,fixer):
     data = [*range(1,x+1)]
     random.shuffle(data)
+    bubbleSort.callbacks = 0
+
     bubblesortstartTime = time.time()
     tracemalloc.start()
+
 
     bubbleSort(data)
 
@@ -87,6 +92,7 @@ for x in range(1,n+2,fixer):
     bubblesortmemoryUsage.append(display_top(snapshot))
     tracemalloc.stop()
 
+    bubblesortcallbacks.append(bubbleSort.callbacks)
     bubblesorttimeValues.append(time.time() - bubblesortstartTime)
 
 
@@ -94,16 +100,18 @@ for x in range(1,n+2,fixer):
 for x in range(1,n+2,fixer):
     data = [*range(1,x+1)]
     random.shuffle(data)
+    timSort.callbacks = 0
 
     timsortstartTime = time.time()
     tracemalloc.start()
 
-    data.sort()
+    timSort(data)
 
     snapshot = tracemalloc.take_snapshot()
     timsortmemoryUsage.append(display_top(snapshot))
     tracemalloc.stop()
 
+    timsortcallbacks.append(timSort.callbacks)
     timsorttimeValues.append(time.time() - timsortstartTime)
 
 
@@ -113,7 +121,7 @@ for x in range(1,n+2,fixer):
 
 
 
-figure, axis = plt.subplots(2)
+figure, axis = plt.subplots(3)
 
 # plotting the points
 plt.plot(arrayLength, quicksorttimeValues, marker="o")
@@ -127,12 +135,26 @@ axis[0].plot(arrayLength, quicksortmemoryUsage, marker="o")
 axis[0].plot(arrayLength, timsortmemoryUsage, marker="o")
 axis[0].plot(arrayLength, bubblesortmemoryUsage, marker="o")
 
-
 axis[0].legend(["Quicksort","Timsort","Bubblesort"])
+
+print(quicksortcallbacks)
+print(timsortcallbacks)
+print(bubblesortcallbacks)
+
+axis[1].plot(arrayLength, quicksortcallbacks, marker="o")
+axis[1].plot(arrayLength, timsortcallbacks, marker="o")
+axis[1].plot(arrayLength, bubblesortcallbacks, marker="o")
+
+
+axis[1].legend(["Quicksort","Timsort","Bubblesort"])
+
+
 
 plt.setp(axis[0], xlabel='length of array')
 plt.setp(axis[0], ylabel='memory usage (b)')
 
+plt.setp(axis[1], xlabel='length of array')
+plt.setp(axis[1], ylabel='number of callbacks')
 
 
 
@@ -161,9 +183,7 @@ plt.ylim([0, max(quicksorttimeValues)+max(quicksorttimeValues)/10])
 
 plt.show()
 
-print(timsortmemoryUsage)
-print(quicksortmemoryUsage)
-print(bubblesortmemoryUsage)
+
 
 
 
