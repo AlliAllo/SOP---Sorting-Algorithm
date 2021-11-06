@@ -1,8 +1,8 @@
 def partition(arr, low, high):
     i = (low - 1)
     pivot = arr[high]
-    for j in range(low, high):
 
+    for j in range(low, high):
         if arr[j] <= pivot:
             quickSort.callbacks += 1
 
@@ -14,10 +14,11 @@ def partition(arr, low, high):
 
 
 def quickSort(arr, low, high):
-
     if len(arr) == 1:
         return arr
     if low < high:
+        quickSort.callbacks += 3
+
         pi = partition(arr, low, high)
 
         quickSort(arr, low, pi - 1)

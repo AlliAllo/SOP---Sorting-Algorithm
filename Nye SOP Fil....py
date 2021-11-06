@@ -3,12 +3,12 @@ import random
 import math
 from quicksort import quickSort
 from bubblesort import bubbleSort
-from mergesort import mergeSort
+from heapsort import mergeSort
 
 
-n = 4000
+n = 10000
 
-fixer = int(1/4 * n)
+fixer = int(1/5 * n)
 
 arrayLength = [*range(0, int(n / fixer + 1))]
 arrayLength = [element * fixer for element in arrayLength]
@@ -33,7 +33,7 @@ for x in range(1,n+2,fixer):
     quicksortcallbacks.append(quickSort.callbacks)
 
 
-
+"""""
 # BUBBLESORT RUNTHORUGH
 for x in range(1,n+2,fixer):
     data = [*range(1,x+1)]
@@ -43,7 +43,7 @@ for x in range(1,n+2,fixer):
     bubbleSort(data)
 
     bubblesortcallbacks.append(bubbleSort.callbacks)
-
+"""""
 
 # MERGESORT RUNTHORUGH
 for x in range(1,n+2,fixer):
@@ -60,7 +60,7 @@ quicksortaverageCase = []
 mergesortaverageCase = []
 bubblesortaverageCase = []
 
-print(arrayLength)
+
 for number in arrayLength:
     if number == 0:
         quicksortaverageCase.append(0)
@@ -71,18 +71,25 @@ for number in arrayLength:
         mergesortaverageCase.append(number)
         bubblesortaverageCase.append(number**2)
 
-print(quicksortaverageCase)
-print(mergesortaverageCase)
-print(bubblesortaverageCase)
+
+
+figure, axis = plt.subplots(3)
 
 # plotting the results
 plt.plot(arrayLength, quicksortcallbacks, marker="o")
 plt.plot(arrayLength, mergesortcallbacks, marker="o")
-plt.plot(arrayLength, bubblesortcallbacks, marker="o")
+#plt.plot(arrayLength, bubblesortcallbacks, marker="o")
 
-#plotting the theorietical answer
+#plotting the theorietical graphs
 plt.plot(arrayLength, quicksortaverageCase, marker=".")
 plt.plot(arrayLength, bubblesortaverageCase, marker=".",label="n*log(n)",color="b")
+
+
+
+axis[0].plot(arrayLength, quicksortmemoryUsage, marker="o")
+axis[0].plot(arrayLength, timsortmemoryUsage, marker="o")
+axis[0].plot(arrayLength, bubblesortmemoryUsage, marker="o")
+
 
 
 plt.legend(["Quicksort","Mergesort","Bubblesort,", "Quicksort2 + Mergesort","Bubblesort2"])
