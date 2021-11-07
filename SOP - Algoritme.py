@@ -38,10 +38,9 @@ def display_top(snapshot, key_type='lineno', limit=None):
 n = 10000
 
 fixer = int(1/4 * n)
-
 arrayLength = [*range(0, int(n / fixer + 1))]
 arrayLength = [element * fixer for element in arrayLength]
-
+print(arrayLength)
 quicksorttimeValues = []
 quicksortmemoryUsage = []
 quicksortcallbacks = []
@@ -54,16 +53,25 @@ heapsorttimeValues = []
 heapsortmemoryUsage = []
 heapsortcallbacks = []
 
+def data(x):
+    #print([*range(1, x + 1)])
+    if x == 1:
+        return [1]
+    else:
+        # HER BRUGER JEG RANDOM.SAMPLE I STEDET FOR RANDOM.SHUFFLE
+        # DET ER FORDI AT RANDOM.SHUFFLE RETURNER NONE, FORDI DER IKKE ER TILSAT EN VARIABLE
+        # DERFOR VIRKER RANDOM.SAMPLE BEDST
+        return random.sample([*range(1, x + 1)],x)
+
 # QUICKSORT RUNTHORUGH
 for x in range(1,n+2,fixer):
-    data = [*range(1,x+1)]
-    random.shuffle(data)
 
     quickSort.callbacks = 0
     quicksortstartTime = time.time()
     tracemalloc.start()
 
-    quickSort(data, 0, x - 1)
+
+    quickSort(data(x), 0, x-1)
 
     snapshot = tracemalloc.take_snapshot()
 
@@ -97,15 +105,14 @@ for x in range(1,n+2,fixer):
 
 # HEAPSORT RUNTHORUGH
 for x in range(1,n+2,fixer):
-    data = [*range(1,x+1)]
-    random.shuffle(data)
+
     heapSort.callbacks = 0
 
     timsortstartTime = time.time()
     tracemalloc.start()
 
 
-    heapSort(data)
+    heapSort(data(x))
 
     snapshot = tracemalloc.take_snapshot()
     heapsortmemoryUsage.append(display_top(snapshot))
@@ -115,16 +122,24 @@ for x in range(1,n+2,fixer):
     heapsorttimeValues.append(time.time() - timsortstartTime)
 
 
-
+"""
 # FUNCTIONS
+for x in range(0,len(arrayLength)):
+    if x == 0:
+        print("Callbacks,  "+ "Length of array")
+    else:
+        print(quicksortcallbacks[x],arrayLength[x])
+"""
+
+
 
 
 figure, axis = plt.subplots(3)
 
 # plotting the points
-axis[0].plot(arrayLength, quicksorttimeValues, marker="o")
+axis[0].plot(arrayLength, quicksorttimeValues,marker="o")
 #plt.plot(bubblesorttimeValues, Operations,marker="o")
-axis[0].plot(arrayLength, heapsorttimeValues, marker="o")
+axis[0].plot(arrayLength, heapsorttimeValues,marker="o")
 #axis[0].plot(arrayLength, bubblesorttimeValues, marker="o")
 
 
@@ -151,7 +166,6 @@ axis[1].legend(["Quicksort","Heapsort","Bubblesort"])
 plt.setp(axis[2], xlabel='length of array')
 plt.setp(axis[2], ylabel='number of callbacks')
 axis[2].legend(["Quicksort","Heapsort","Bubblesort"])
-
 
 
 
