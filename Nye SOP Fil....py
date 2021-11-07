@@ -1,50 +1,30 @@
 import matplotlib.pyplot as plt
 import random
-import os
-import tracemalloc
 import time
 from quicksort import quickSort
 from bubblesort import bubbleSort
 from heapsort import heapSort
 
-import psutil
-import tracemalloc
-import linecache
+
 
 startTime = time.time()
 
-def display_top(snapshot, key_type='lineno', limit=None):
-    snapshot = snapshot.filter_traces((
-        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
-        tracemalloc.Filter(False, "<unknown>"),
-    ))
-    top_stats = snapshot.statistics(key_type)
-
-    for index, stat in enumerate(top_stats[:limit], 1):
-        frame = stat.traceback[0]
-        # replace "/path/to/module/file.py" with "module/file.py"
-        filename = os.sep.join(frame.filename.split(os.sep)[-2:])
-
-        line = linecache.getline(frame.filename, frame.lineno).strip()
-
-
-    other = top_stats[limit:]
-    if other:
-        size = sum(stat.size for stat in other)
-    total = sum(stat.size for stat in top_stats)
-
-    return (total / 1024)
 
 
 
-n = 100
-retries = 10000
+n = 1000
+retries = 1500
 
-start = int(n*0)
+
+
+fixer = int(n*1/8)
+
+start = int(n*0.5)
 
 end = n+1
 
-arrayLength = [*range(start, end)]
+arrayLength = [*range(start, end, fixer)]
+
 
 worstTime = []
 averageTime = []
@@ -58,12 +38,15 @@ def data(x):
         # HER BRUGER JEG RANDOM.SAMPLE I STEDET FOR RANDOM.SHUFFLE
         # DET ER FORDI AT RANDOM.SHUFFLE RETURNER NONE, FORDI DER IKKE ER TILSAT EN VARIABLE
         # DERFOR VIRKER RANDOM.SAMPLE BEDST
-        return random.sample([*range(1, x + 1)],x)
+
+        #return sorted([*range(0, x)],reverse=True)
+
+        return random.sample([*range(0, x)],x)
 
 # QUICKSORT RUNTHORUGH
-for x in range(start,end):
+for x in range(start,end,fixer):
     quicksorttimeValues = []
-    for y in range(1,retries):
+    for y in range(0,retries):
 
         quicksortstartTime = time.time()
 
@@ -91,16 +74,16 @@ for x in range(0,len(arrayLength)):
 
 
 
+print(worstTime)
+
+plt.plot(arrayLength, worstTime,marker="o")
+plt.plot(arrayLength, averageTime,marker="o")
+plt.plot(arrayLength, bestTime,marker="o")
 
 
-plt.plot(arrayLength, worstTime)
-plt.plot(arrayLength, averageTime)
-plt.plot(arrayLength, bestTime)
 
-
-
-plt.title("Number of retries: "+str(retries))
-plt.xlabel('length of array (s)')
+plt.title("Number of retries: "+str(retries)+", seconds used: "+str(time.time()-startTime))
+plt.xlabel('length of array')
 plt.ylabel('time consumption (s)')
 plt.legend(["Worst","Average","Best"])
 
@@ -111,7 +94,7 @@ plt.xlim([start, end])
 plt.show()
 
 
-print("Total time consumed: " + str(time.time()-startTime))
+print("Total time consumed: " + str(time.time()-startTime)+", "+str(int(sum(averageTime))))
 
 
 
