@@ -4,7 +4,9 @@ import time
 from quicksort import quickSort
 from bubblesort import bubbleSort
 from heapsort import heapSort
-
+import pickle as pkl
+import math
+import linecache
 
 
 startTime = time.time()
@@ -12,23 +14,22 @@ startTime = time.time()
 
 
 
-n = 1000
-retries = 1500
+n = 10000
+retries = 100
 
 
-
-fixer = int(n*1/8)
+# VARIABLE FOR INTERVAL, ALSO NUMBER OF POINTS.
+points = int(n * 1 / 12)
 
 start = int(n*0.5)
 
 end = n+1
 
-arrayLength = [*range(start, end, fixer)]
+arrayLength = [*range(start, end, points)]
 
 
-worstTime = []
 averageTime = []
-bestTime = []
+averageCallbacks = []
 
 def data(x):
     #print([*range(1, x + 1)])
@@ -44,22 +45,27 @@ def data(x):
         return random.sample([*range(0, x)],x)
 
 # QUICKSORT RUNTHORUGH
-for x in range(start,end,fixer):
+for x in range(start, end, points):
     quicksorttimeValues = []
+    quicksortcallbacks = []
+
     for y in range(0,retries):
+
+        quickSort.callbacks = 0
 
         quicksortstartTime = time.time()
 
+        #heapSort(data(x))
         quickSort(data(x), 0, x-1)
 
         quicksorttimeValues.append(time.time() - quicksortstartTime)
+        quicksortcallbacks.append(quickSort.callbacks)
 
     # PROGESS CHECKER
     print(str(x)+":"+str(n))
 
-    bestTime.append(min(quicksorttimeValues))
     averageTime.append(sum(quicksorttimeValues)/len(quicksorttimeValues))
-    worstTime.append(max(quicksorttimeValues))
+    averageCallbacks.append(sum(quicksortcallbacks)/len(quicksortcallbacks))
 
 
 
@@ -72,26 +78,34 @@ for x in range(0,len(arrayLength)):
         print(quicksortcallbacks[x],arrayLength[x])
 """
 
+theory = []
+for x in arrayLength:
+    if x == 0:
+        theory.append(0)
+    else:
+        theory.append(x*math.log2(x))
 
 
-print(worstTime)
+#plt.plot(arrayLength, averageTime,marker="o")
+print(averageCallbacks)
+plt.plot(arrayLength, averageCallbacks,marker="o")
 
-plt.plot(arrayLength, worstTime,marker="o")
-plt.plot(arrayLength, averageTime,marker="o")
-plt.plot(arrayLength, bestTime,marker="o")
-
+plt.plot(arrayLength, theory,marker="o")
 
 
 plt.title("Number of retries: "+str(retries)+", seconds used: "+str(time.time()-startTime))
 plt.xlabel('length of array')
-plt.ylabel('time consumption (s)')
-plt.legend(["Worst","Average","Best"])
+plt.ylabel('operations')
+plt.legend(["Average","Theory"])
 
+#støt shabab
 
 plt.xlim([start, end])
 
 
 plt.show()
+
+pkl.dump(plt.show(),  open("FigureObject.pickle",  'wb'))
 
 
 print("Total time consumed: " + str(time.time()-startTime)+", "+str(int(sum(averageTime))))

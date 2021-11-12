@@ -3,7 +3,9 @@ def partition(arr, low, high):
     pivot = arr[high]                                 #c2 = 1
 
     for j in range(low, high):                         #c3 = n+1
-        if arr[j] <= pivot:                            #c4 = n
+
+        if arr[j] <= pivot:
+            quickSort.callbacks += 1
             i = i + 1                                  #c5 = n
             arr[i], arr[j] = arr[j], arr[i]            #c5 = n
 
@@ -14,8 +16,8 @@ def partition(arr, low, high):
 def quickSort(arr, low, high):
     if len(arr) == 1:
         return arr
-    #print(arr)
     if low < high:
+        #quickSort.callbacks += 3
 
         pivot = partition(arr, low, high)
 
