@@ -1,34 +1,18 @@
-def fizzBuzz(n):
-    for i in range(n):
-        i += 1
-        fizz = (i / 3)
-        buzz = i / 5
-        fizzbuzz = (i / 15)
-
-        if fizzbuzz - int(fizzbuzz) == 0:
-            print("fizzbuzz")
-        elif fizz - int(fizz) == 0:
-            print("fizz")
-        elif buzz - int(buzz) == 0:
-            print("buzz")
-        else:
-            print(i)
+import math
 
 
-fizzBuzz(100)
 
-def fizzBuzz2(n):
-    for i in range(n):
-        output = ""
-        i += 1
-        fizz = (i / 3)
-        buzz = i / 5
-        fizzbuzz = (i / 15)
+def calc(number):
+    print("Base  e: "+ str(math.log(number)))
+    print("Base  2: "+ str(math.log2(number)))
+    print("Base 10: "+ str(math.log10(number)))
 
-        if fizzbuzz - int(fizzbuzz) == 0:
-            print("fizzbuzz")
-        elif fizz - int(fizz) == 0:
-            print("fizz")
-        elif buzz - int(buzz) == 0:
-            print("buzz")
-        else:
+
+
+
+
+
+
+
+n = 10000000000**100000
+calc(int(n))

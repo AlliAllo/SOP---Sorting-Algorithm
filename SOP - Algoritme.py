@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import random
 import os
-import tracemalloc
 import time
 from quicksort import quickSort
 from bubblesort import bubbleSort
 from heapsort import heapSort
-
-import psutil
+import math
 import tracemalloc
 import linecache
+
+startTime = time.time()
+
 
 def display_top(snapshot, key_type='lineno', limit=None):
     snapshot = snapshot.filter_traces((
@@ -34,24 +35,34 @@ def display_top(snapshot, key_type='lineno', limit=None):
     return (total / 1024)
 
 
+n = 5000
+retries = 30
+points = 6
+start = 0.9
 
-n = 10000
 
-fixer = int(1/4 * n)
-arrayLength = [*range(0, int(n / fixer + 1))]
-arrayLength = [element * fixer for element in arrayLength]
-print(arrayLength)
-quicksorttimeValues = []
-quicksortmemoryUsage = []
-quicksortcallbacks = []
+start = int(n*start)
+
+points = int((n -start) * 1 / points)
+
+end = n+1
+
+arrayLength = [*range(start, end, points)]
+
+
+averagequicksortcallbacks = []
+averagequicksortmemoryusage = []
+averagequicksorttimeValues = []
+
+averageheapsortcallbacks = []
+averageheapsortmemoryusage = []
+averageheapsorttimeValues = []
 
 bubblesorttimeValues = []
 bubblesortmemoryUsage = []
 bubblesortcallbacks = []
 
-heapsorttimeValues = []
-heapsortmemoryUsage = []
-heapsortcallbacks = []
+
 
 def data(x):
     #print([*range(1, x + 1)])
@@ -64,24 +75,36 @@ def data(x):
         return random.sample([*range(1, x + 1)],x)
 
 # QUICKSORT RUNTHORUGH
-for x in range(1,n+2,fixer):
+for x in range(start, end, points):
+    quicksorttimeValues = []
+    quicksortmemoryUsage = []
+    quicksortcallbacks = []
 
-    quickSort.callbacks = 0
-    quicksortstartTime = time.time()
-    tracemalloc.start()
+    for y in range(0, retries):
+        quickSort.callbacks = 0
+
+        quicksortstartTime = time.time()
+        tracemalloc.start()
+
+        # heapSort(data(x))
+        quickSort(data(x), 0, x - 1)
+
+        snapshot = tracemalloc.take_snapshot()
+
+        quicksortmemoryUsage.append(display_top(tracemalloc.take_snapshot()))
+        tracemalloc.stop()
+
+        quicksorttimeValues.append(time.time() - quicksortstartTime)
+        quicksortcallbacks.append(quickSort.callbacks)
+
+    print(str(x)+":"+str(n))
+
+    averagequicksorttimeValues.append(sum(quicksorttimeValues)/len(quicksorttimeValues))
+    averagequicksortcallbacks.append(sum(quicksortcallbacks)/len(quicksortcallbacks))
+    averagequicksortmemoryusage.append(sum(quicksortmemoryUsage)/len(quicksortmemoryUsage))
 
 
-    quickSort(data(x), 0, x-1)
 
-    snapshot = tracemalloc.take_snapshot()
-
-    quicksortmemoryUsage.append(display_top(snapshot))
-
-    #quicksortmemoryUsage.append(tracemalloc.get_traced_memory()[1])
-    tracemalloc.stop()
-    quicksortcallbacks.append(quickSort.callbacks)
-
-    quicksorttimeValues.append(time.time() - quicksortstartTime)
 
 """""
 # BUBBLESORT RUNTHORUGH
@@ -104,23 +127,33 @@ for x in range(1,n+2,fixer):
 """
 
 # HEAPSORT RUNTHORUGH
-for x in range(1,n+2,fixer):
+for x in range(start, end, points):
 
-    heapSort.callbacks = 0
+    heapsorttimeValues = []
+    heapsortmemoryUsage = []
+    heapsortcallbacks = []
 
-    timsortstartTime = time.time()
-    tracemalloc.start()
+    for y in range(0, retries):
+        heapSort.callbacks = 0
 
+        heapsortstartTime = time.time()
+        tracemalloc.start()
 
-    heapSort(data(x))
+        # heapSort(data(x))
+        heapSort(data(x))
 
-    snapshot = tracemalloc.take_snapshot()
-    heapsortmemoryUsage.append(display_top(snapshot))
-    tracemalloc.stop()
+        snapshot = tracemalloc.take_snapshot()
 
-    heapsortcallbacks.append(heapSort.callbacks)
-    heapsorttimeValues.append(time.time() - timsortstartTime)
+        heapsortmemoryUsage.append(display_top(tracemalloc.take_snapshot()))
+        tracemalloc.stop()
+        heapsorttimeValues.append(time.time() - heapsortstartTime)
+        heapsortcallbacks.append(heapSort.callbacks)
 
+    print(str(x)+":"+str(n))
+
+    averageheapsorttimeValues.append(sum(heapsorttimeValues) / len(heapsorttimeValues))
+    averageheapsortcallbacks.append(sum(heapsortcallbacks) / len(heapsortcallbacks))
+    averageheapsortmemoryusage.append(sum(heapsortmemoryUsage) / len(heapsortmemoryUsage))
 
 """
 # FUNCTIONS
@@ -131,27 +164,37 @@ for x in range(0,len(arrayLength)):
         print(quicksortcallbacks[x],arrayLength[x])
 """
 
+print(averagequicksortcallbacks)
+print(averageheapsortcallbacks)
 
+theory = []
 
+for x in arrayLength:
+    if x == 0:
+        theory.append(0)
+    else:
+        theory.append(x*math.log2(x))
 
 figure, axis = plt.subplots(3)
 
 # plotting the points
-axis[0].plot(arrayLength, quicksorttimeValues,marker="o")
+axis[0].plot(arrayLength, averagequicksorttimeValues,marker="o")
 #plt.plot(bubblesorttimeValues, Operations,marker="o")
-axis[0].plot(arrayLength, heapsorttimeValues,marker="o")
+axis[0].plot(arrayLength, averageheapsorttimeValues,marker="o")
 #axis[0].plot(arrayLength, bubblesorttimeValues, marker="o")
 
 
 
-axis[1].plot(arrayLength, quicksortmemoryUsage, marker="o")
-axis[1].plot(arrayLength, heapsortmemoryUsage, marker="o")
+axis[1].plot(arrayLength, averagequicksortmemoryusage, marker="o")
+axis[1].plot(arrayLength, averageheapsortmemoryusage, marker="o")
 #axis[1].plot(arrayLength, bubblesortmemoryUsage, marker="o")
 
 
 
-axis[2].plot(arrayLength, quicksortcallbacks, marker="o")
-axis[2].plot(arrayLength, heapsortcallbacks, marker="o")
+axis[2].plot(arrayLength, averagequicksortcallbacks, marker="o")
+axis[2].plot(arrayLength, averageheapsortcallbacks, marker="o")
+axis[2].plot(arrayLength, theory, marker="o")
+
 #axis[2].plot(arrayLength, bubblesortcallbacks, marker="o")
 
 
@@ -165,33 +208,18 @@ axis[1].legend(["Quicksort","Heapsort","Bubblesort"])
 
 plt.setp(axis[2], xlabel='length of array')
 plt.setp(axis[2], ylabel='number of callbacks')
-axis[2].legend(["Quicksort","Heapsort","Bubblesort"])
+axis[2].legend(["Quicksort","Heapsort","Theory"])
 
 
 
-plt.xlim([0, max(arrayLength) + (max(arrayLength) / 10)])
-
+plt.xlim([start, end])
 
 plt.show()
 
 
+print("Total time consumed: " + str(time.time()-startTime))
 
 
 
-
-
-memory = psutil.virtual_memory().used
-
-#print(str(memory)+" b")
-#print(str(memory*10**-6)+" mb")
-
-#Current memory usage is 1.83849MB; Peak was 6.55887MB
-
-
-
-
-
-# GODE BEGREBER AT KUNNE:
-# Turing equivalence
 
 

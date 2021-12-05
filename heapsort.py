@@ -8,6 +8,8 @@ def heapify(arr, n, i):
     if r < n and arr[largest] < arr[r]:
         largest = r
     if largest != i:
+        heapSort.callbacks += 1
+
         arr[i], arr[largest] = arr[largest], arr[i]
         heapify(arr, n, largest)
 
@@ -19,5 +21,7 @@ def heapSort(arr):
         heapify(arr, n, i)
 
     for i in range(n - 1, 0, -1):
+        heapSort.callbacks += 2
+
         arr[i], arr[0] = arr[0], arr[i]
         heapify(arr, i, 0)

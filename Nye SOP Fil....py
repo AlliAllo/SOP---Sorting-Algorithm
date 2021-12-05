@@ -14,14 +14,19 @@ startTime = time.time()
 
 
 
-n = 10000
+n = 5000
 retries = 100
+points = 5
 
+start = 0.9
 
 # VARIABLE FOR INTERVAL, ALSO NUMBER OF POINTS.
-points = int(n * 1 / 12)
 
-start = int(n*0.5)
+
+start = int(n*start)
+
+points = int((n -start) * 1 / points)
+
 
 end = n+1
 
@@ -41,8 +46,11 @@ def data(x):
         # DERFOR VIRKER RANDOM.SAMPLE BEDST
 
         #return sorted([*range(0, x)],reverse=True)
-
-        return random.sample([*range(0, x)],x)
+        d = []
+        for z in range(x):
+            d.append(random.randint(0,x))
+        return d
+        #return random.sample([*range(0, x)],x)
 
 # QUICKSORT RUNTHORUGH
 for x in range(start, end, points):
@@ -79,11 +87,16 @@ for x in range(0,len(arrayLength)):
 """
 
 theory = []
+theory2 = []
+theory3 = []
+
 for x in arrayLength:
     if x == 0:
         theory.append(0)
     else:
-        theory.append(x*math.log2(x))
+        theory.append(x*math.log(x))
+        theory2.append(x*math.log2(x))
+        theory3.append(x*math.log10(x))
 
 
 #plt.plot(arrayLength, averageTime,marker="o")
@@ -91,12 +104,14 @@ print(averageCallbacks)
 plt.plot(arrayLength, averageCallbacks,marker="o")
 
 plt.plot(arrayLength, theory,marker="o")
+plt.plot(arrayLength, theory2,marker="o")
+plt.plot(arrayLength, theory3,marker="o")
 
 
 plt.title("Number of retries: "+str(retries)+", seconds used: "+str(time.time()-startTime))
 plt.xlabel('length of array')
 plt.ylabel('operations')
-plt.legend(["Average","Theory"])
+plt.legend(["Average","Base e","Base 2","Base 10"])
 
 #støt shabab
 
