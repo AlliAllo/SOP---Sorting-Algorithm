@@ -14,8 +14,8 @@ startTime = time.time()
 
 
 
-n = 5000
-retries = 100
+n = 50
+retries = 1
 points = 5
 
 start = 0.9

@@ -35,10 +35,10 @@ def display_top(snapshot, key_type='lineno', limit=None):
     return (total / 1024)
 
 
-n = 5000
-retries = 30
-points = 6
-start = 0.9
+n = 40
+retries = 1
+points = 1
+start = 0
 
 
 start = int(n*start)
@@ -72,7 +72,10 @@ def data(x):
         # HER BRUGER JEG RANDOM.SAMPLE I STEDET FOR RANDOM.SHUFFLE
         # DET ER FORDI AT RANDOM.SHUFFLE RETURNER NONE, FORDI DER IKKE ER TILSAT EN VARIABLE
         # DERFOR VIRKER RANDOM.SAMPLE BEDST
-        return random.sample([*range(1, x + 1)],x)
+        return random.sample([*range(0, x )],x)
+
+        #return sorted([*range(0, x)])
+
 
 # QUICKSORT RUNTHORUGH
 for x in range(start, end, points):
@@ -102,7 +105,7 @@ for x in range(start, end, points):
     averagequicksorttimeValues.append(sum(quicksorttimeValues)/len(quicksorttimeValues))
     averagequicksortcallbacks.append(sum(quicksortcallbacks)/len(quicksortcallbacks))
     averagequicksortmemoryusage.append(sum(quicksortmemoryUsage)/len(quicksortmemoryUsage))
-
+print(quicksortcallbacks)
 
 
 
